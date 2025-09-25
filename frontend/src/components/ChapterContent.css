@@ -1,0 +1,251 @@
+/* Chapter Content */
+.chapter-content {
+  flex: 1;
+  padding: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  overflow-y: auto;
+}
+
+/* Welcome Screen */
+.welcome-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 8rem);
+  text-align: center;
+  padding: 2rem;
+}
+
+.welcome-content h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+}
+
+.welcome-content p {
+  font-size: 1.25rem;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.welcome-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.feature {
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.feature:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  border-color: var(--accent-primary);
+}
+
+.feature .feature-icon {
+  margin-bottom: 1rem;
+}
+
+.feature .feature-icon svg {
+  color: var(--accent-primary);
+}
+
+.feature h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--accent-primary);
+}
+
+.feature p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* Chapter Header */
+.chapter-header {
+  margin-bottom: 2rem;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+.chapter-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.chapter-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+}
+
+/* Chapter Body */
+.chapter-body {
+  line-height: 1.7;
+  font-size: 1rem;
+  padding: 0 2rem;
+}
+
+.chapter-body h2,
+.chapter-body h3,
+.chapter-body h4 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.chapter-body p {
+  margin-bottom: 1.5rem;
+}
+
+.chapter-body ul,
+.chapter-body ol {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+}
+
+.chapter-body li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.chapter-body li::marker {
+  color: var(--accent-primary);
+}
+
+/* Survival Tips (blockquotes) */
+.survival-tip {
+  background: rgba(93, 138, 58, 0.1);
+  border-left: 4px solid var(--accent-primary);
+  padding: 1.5rem;
+  margin: 2rem 0;
+  border-radius: 0 8px 8px 0;
+  position: relative;
+}
+
+.survival-tip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.survival-tip-header svg {
+  color: var(--accent-primary);
+}
+
+.survival-tip p {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Code styling */
+.chapter-body pre {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chapter-body code {
+  font-family: 'Courier New', monospace;
+}
+
+/* Images */
+.chapter-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border-color);
+}
+
+/* Tables */
+.chapter-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background: var(--bg-secondary);
+}
+
+.chapter-body th,
+.chapter-body td {
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+.chapter-body th {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.chapter-body td {
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chapter-content {
+    padding: 1rem;
+  }
+  
+  .welcome-content h1 {
+    font-size: 2rem;
+  }
+  
+  .welcome-features {
+    grid-template-columns: 1fr;
+  }
+  
+  .chapter-header h1 {
+    font-size: 2rem;
+  }
+  
+  .chapter-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}

@@ -1,0 +1,125 @@
+/* Page de chat */
+.chat-page {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.chat-placeholder {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.placeholder-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: rgba(93, 138, 58, 0.1);
+  border-radius: 50%;
+  margin-bottom: 2rem;
+  color: var(--accent-primary);
+}
+
+.chat-placeholder h1 {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.placeholder-description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 3rem;
+}
+
+.features-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  text-align: left;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  border-color: var(--accent-primary);
+}
+
+.feature-item svg {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.feature-item h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.feature-item p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.coming-soon {
+  margin-top: 2rem;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--accent-primary);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chat-page {
+    padding: 1rem;
+  }
+  
+  .chat-placeholder h1 {
+    font-size: 2rem;
+  }
+  
+  .placeholder-icon {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .placeholder-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .feature-item {
+    padding: 1rem;
+  }
+}
