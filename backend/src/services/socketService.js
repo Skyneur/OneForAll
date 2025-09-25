@@ -36,8 +36,8 @@ function deleteMessage(roomId, messageId) {
       console.log(`🗑️ Message expiré supprimé: ${deletedMessage.message} (type: ${deletedMessage.type})`);
       
       // Notifier tous les clients de la room que le message a été supprimé
-      if (module.exports.io) {
-        module.exports.io.to(roomId).emit('message:deleted', { messageId });
+      if (globalIo) {
+        globalIo.to(roomId).emit('message:deleted', { messageId });
       }
     }
   }
@@ -92,9 +92,12 @@ function determineMessageType(message) {
  * Configuration des gestionnaires Socket.IO
  * @param {Server} io - Instance Socket.IO
  */
+// Variable globale pour stocker l'instance io
+let globalIo;
+
 export function setupSocketHandlers(io) {
   // Stocker l'instance io pour l'utiliser dans les fonctions de suppression
-  module.exports.io = io;
+  globalIo = io;
   
   // Nettoyer les messages expirés au démarrage
   cleanupExpiredMessages();
@@ -474,13 +477,13 @@ export function broadcastSystemMessage(message, roomId = null) {
     // Programmer la suppression automatique
     scheduleMessageDeletion(roomId, messageData.id, 'system');
     
-    if (module.exports.io) {
-      module.exports.io.to(roomId).emit('chat:message', messageData);
+    if (globalIo) {
+      globalIo.to(roomId).emit('chat:message', messageData);
     }
   } else {
     // Message global
-    if (module.exports.io) {
-      module.exports.io.emit('chat:system_message', messageData);
+    if (globalIo) {
+      globalIo.emit('chat:system_message', messageData);
     }
   }
 }
