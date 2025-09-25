@@ -12,8 +12,9 @@ interface Message {
   username: string;
   message: string;
   timestamp: string;
-  type: 'user' | 'bot' | 'system';
+  type: 'user' | 'bot' | 'system' | 'normal' | 'alert';
   userId: string;
+  expiresAt?: string;
 }
 
 interface Stats {
@@ -29,6 +30,7 @@ export const ChatPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
+  const [messageType, setMessageType] = useState<'normal' | 'alert'>('normal');
   const [stats, setStats] = useState<Stats>({ connectedClients: 0, authenticatedClients: 0, activeRooms: 0 });
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -113,6 +115,11 @@ export const ChatPage: React.FC = () => {
       addSystemMessage(`❌ Erreur: ${error.message}`);
     });
 
+    // Gestion des messages supprimés
+    newSocket.on('message:deleted', (data) => {
+      setMessages(prev => prev.filter(msg => msg.id !== data.messageId));
+    });
+
     setSocket(newSocket);
   };
 
@@ -143,7 +150,8 @@ export const ChatPage: React.FC = () => {
 
     socket.emit('chat:message', {
       message: messageInput.trim(),
-      roomId: 'general'
+      roomId: 'general',
+      type: messageType
     });
 
     setMessageInput('');
@@ -265,6 +273,13 @@ export const ChatPage: React.FC = () => {
                   <span className="message-time">{formatTimestamp(message.timestamp)}</span>
                 </div>
                 <div className="message-content">{message.message}</div>
+                {message.expiresAt && (
+                  <div className="message-expiry">
+                    {message.type === 'alert' ? '⚠️ Expire dans 24h' : 
+                     message.type === 'system' ? '🔧 Expire dans 24h' : 
+                     '⏰ Expire dans 1min'}
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -274,23 +289,45 @@ export const ChatPage: React.FC = () => {
         {/* Zone de saisie */}
         <div className="message-input-container">
           {connected && authenticated ? (
-            <div className="input-group">
-              <input
-                type="text"
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Tapez votre message..."
-                className="message-input"
-              />
-              <button 
-                onClick={sendMessage}
-                disabled={!messageInput.trim()}
-                className="send-button"
-              >
-                <Send size={18} />
-              </button>
-            </div>
+            <>
+              <div className="message-type-selector">
+                <label>
+                  <input
+                    type="radio"
+                    value="normal"
+                    checked={messageType === 'normal'}
+                    onChange={(e) => setMessageType(e.target.value as 'normal' | 'alert')}
+                  />
+                  💬 Message normal (1min)
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="alert"
+                    checked={messageType === 'alert'}
+                    onChange={(e) => setMessageType(e.target.value as 'normal' | 'alert')}
+                  />
+                  ⚠️ Alerte (24h)
+                </label>
+              </div>
+              <div className="input-group">
+                <input
+                  type="text"
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={messageType === 'alert' ? "Tapez votre alerte..." : "Tapez votre message..."}
+                  className="message-input"
+                />
+                <button 
+                  onClick={sendMessage}
+                  disabled={!messageInput.trim()}
+                  className="send-button"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </>
           ) : (
             <div className="connection-prompt">
               {connected ? (

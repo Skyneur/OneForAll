@@ -172,6 +172,42 @@
   border-top: 1px solid rgba(252, 165, 3, 0.2);
 }
 
+.message-type-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.message-type-selector label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid rgba(252, 165, 3, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.message-type-selector label:hover {
+  border-color: var(--accent-color);
+  background: rgba(252, 165, 3, 0.1);
+}
+
+.message-type-selector input[type="radio"] {
+  margin: 0;
+}
+
+.message-type-selector label:has(input:checked) {
+  border-color: var(--accent-color);
+  background: rgba(252, 165, 3, 0.2);
+  color: var(--accent-color);
+}
+
 .input-group {
   display: flex;
   gap: 0.75rem;
@@ -403,4 +439,43 @@
   .modal-actions {
     flex-direction: column;
   }
+}
+
+/* Types de messages */
+.message.alert {
+  border-left: 4px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.message.alert .message-header {
+  color: #ef4444;
+}
+
+.message.normal {
+  border-left: 4px solid #3b82f6;
+}
+
+.message.system {
+  border-left: 4px solid #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.message.system .message-header {
+  color: #8b5cf6;
+}
+
+/* Indicateur d'expiration */
+.message-expiry {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-top: 0.25rem;
+}
+
+.message.alert .message-expiry {
+  color: #ef4444;
+}
+
+.message.system .message-expiry {
+  color: #8b5cf6;
 }

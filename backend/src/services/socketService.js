@@ -4,11 +4,108 @@ import { v4 as uuidv4 } from 'uuid';
 const connectedClients = new Map();
 const chatRooms = new Map();
 
+// Configuration des durées d'expiration (en millisecondes)
+const MESSAGE_EXPIRY = {
+  normal: 1 * 60 * 1000,      // 1 minute
+  alert: 24 * 60 * 60 * 1000, // 24 heures
+  system: 24 * 60 * 60 * 1000 // 24 heures pour les messages système
+};
+
+// Stockage des timers de suppression
+const messageTimers = new Map();
+
+// Fonction pour programmer la suppression d'un message
+function scheduleMessageDeletion(roomId, messageId, messageType = 'normal') {
+  const expiryTime = MESSAGE_EXPIRY[messageType] || MESSAGE_EXPIRY.normal;
+  
+  const timer = setTimeout(() => {
+    deleteMessage(roomId, messageId);
+  }, expiryTime);
+  
+  // Stocker le timer pour pouvoir l'annuler si nécessaire
+  messageTimers.set(messageId, timer);
+}
+
+// Fonction pour supprimer un message
+function deleteMessage(roomId, messageId) {
+  const room = chatRooms.get(roomId);
+  if (room) {
+    const messageIndex = room.messages.findIndex(msg => msg.id === messageId);
+    if (messageIndex !== -1) {
+      const deletedMessage = room.messages.splice(messageIndex, 1)[0];
+      console.log(`🗑️ Message expiré supprimé: ${deletedMessage.message} (type: ${deletedMessage.type})`);
+      
+      // Notifier tous les clients de la room que le message a été supprimé
+      if (module.exports.io) {
+        module.exports.io.to(roomId).emit('message:deleted', { messageId });
+      }
+    }
+  }
+  
+  // Nettoyer le timer
+  messageTimers.delete(messageId);
+}
+
+// Fonction pour nettoyer les messages expirés au démarrage
+function cleanupExpiredMessages() {
+  chatRooms.forEach((room, roomId) => {
+    const now = new Date();
+    const validMessages = room.messages.filter(msg => {
+      if (msg.expiresAt && new Date(msg.expiresAt) <= now) {
+        console.log(`🧹 Nettoyage message expiré: ${msg.message}`);
+        return false;
+      }
+      return true;
+    });
+    room.messages = validMessages;
+    
+    // Reprogrammer les timers pour les messages restants
+    room.messages.forEach(msg => {
+      if (msg.expiresAt && msg.id) {
+        const timeLeft = new Date(msg.expiresAt).getTime() - now.getTime();
+        if (timeLeft > 0) {
+          const timer = setTimeout(() => {
+            deleteMessage(roomId, msg.id);
+          }, timeLeft);
+          messageTimers.set(msg.id, timer);
+        }
+      }
+    });
+  });
+}
+
+// Fonction pour déterminer le type de message
+function determineMessageType(message) {
+  const alertKeywords = ['alerte', 'alert', 'urgent', 'critique', 'erreur', 'error', 'problème', 'problem', 'attention', 'warning'];
+  const lowerMessage = message.toLowerCase();
+  
+  for (const keyword of alertKeywords) {
+    if (lowerMessage.includes(keyword)) {
+      return 'alert';
+    }
+  }
+  
+  return 'normal';
+}
+
 /**
  * Configuration des gestionnaires Socket.IO
  * @param {Server} io - Instance Socket.IO
  */
 export function setupSocketHandlers(io) {
+  // Stocker l'instance io pour l'utiliser dans les fonctions de suppression
+  module.exports.io = io;
+  
+  // Nettoyer les messages expirés au démarrage
+  cleanupExpiredMessages();
+  
+  // Nettoyer périodiquement les messages expirés (toutes les 5 minutes)
+  setInterval(() => {
+    cleanupExpiredMessages();
+  }, 5 * 60 * 1000);
+  
+  console.log('🔌 Système d\'expiration des messages initialisé');
+  
   io.on('connection', (socket) => {
     console.log(`👤 Nouveau client connecté: ${socket.id}`);
     
@@ -125,7 +222,7 @@ export function setupSocketHandlers(io) {
     // Gestion des messages de chat
     socket.on('chat:message', (data) => {
       try {
-        const { message, roomId } = data;
+        const { message, roomId, type } = data;
         
         if (!clientInfo.username) {
           socket.emit('error', { message: 'Non authentifié' });
@@ -149,6 +246,9 @@ export function setupSocketHandlers(io) {
           return;
         }
         
+        // Utiliser le type fourni ou déterminer automatiquement
+        const messageType = type || determineMessageType(message.trim());
+        
         const messageData = {
           id: uuidv4(),
           userId: clientInfo.userId,
@@ -156,13 +256,17 @@ export function setupSocketHandlers(io) {
           message: message.trim(),
           roomId: targetRoom,
           timestamp: new Date(),
-          type: 'user'
+          type: messageType,
+          expiresAt: new Date(Date.now() + MESSAGE_EXPIRY[messageType])
         };
         
         // Sauvegarder le message dans la room
         const room = chatRooms.get(targetRoom);
         if (room) {
           room.messages.push(messageData);
+          
+          // Programmer la suppression automatique
+          scheduleMessageDeletion(targetRoom, messageData.id, messageType);
           
           // Garder seulement les 100 derniers messages
           if (room.messages.length > 100) {
@@ -312,11 +416,40 @@ export function setupSocketHandlers(io) {
  * Obtenir les statistiques du serveur
  */
 export function getServerStats() {
+  let totalMessages = 0;
+  let normalMessages = 0;
+  let alertMessages = 0;
+  let systemMessages = 0;
+  
+  chatRooms.forEach(room => {
+    totalMessages += room.messages.length;
+    room.messages.forEach(msg => {
+      switch(msg.type) {
+        case 'normal':
+          normalMessages++;
+          break;
+        case 'alert':
+          alertMessages++;
+          break;
+        case 'system':
+          systemMessages++;
+          break;
+      }
+    });
+  });
+  
   return {
     connectedClients: connectedClients.size,
     authenticatedClients: Array.from(connectedClients.values())
       .filter(client => client.username).length,
     activeRooms: chatRooms.size,
+    totalMessages,
+    messagesByType: {
+      normal: normalMessages,
+      alert: alertMessages,
+      system: systemMessages
+    },
+    activeTimers: messageTimers.size,
     uptime: process.uptime()
   };
 }
@@ -329,7 +462,8 @@ export function broadcastSystemMessage(message, roomId = null) {
     id: uuidv4(),
     message: message,
     timestamp: new Date(),
-    type: 'system'
+    type: 'system',
+    expiresAt: new Date(Date.now() + MESSAGE_EXPIRY.system)
   };
   
   if (roomId && chatRooms.has(roomId)) {
@@ -337,9 +471,16 @@ export function broadcastSystemMessage(message, roomId = null) {
     const room = chatRooms.get(roomId);
     room.messages.push(messageData);
     
-    io.to(roomId).emit('chat:message', messageData);
+    // Programmer la suppression automatique
+    scheduleMessageDeletion(roomId, messageData.id, 'system');
+    
+    if (module.exports.io) {
+      module.exports.io.to(roomId).emit('chat:message', messageData);
+    }
   } else {
     // Message global
-    io.emit('chat:system_message', messageData);
+    if (module.exports.io) {
+      module.exports.io.emit('chat:system_message', messageData);
+    }
   }
 }
