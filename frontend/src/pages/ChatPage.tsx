@@ -3,6 +3,10 @@ import { MessageCircle, Send, Users, Wifi, WifiOff, AlertCircle } from 'lucide-r
 import { io, Socket } from 'socket.io-client';
 import './ChatPage.css';
 
+// Configuration des URLs via variables d'environnement
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+
 interface Message {
   id: string;
   username: string;
@@ -41,7 +45,7 @@ export const ChatPage: React.FC = () => {
     // Charger les stats périodiquement
     const loadStats = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/chat/stats');
+        const response = await fetch(`${API_URL}/api/chat/stats`);
         const data = await response.json();
         if (data.success) {
           setStats(data.data);
@@ -57,7 +61,7 @@ export const ChatPage: React.FC = () => {
   }, []);
 
   const connectToChat = (username: string) => {
-    const newSocket = io('http://localhost:3001');
+    const newSocket = io(SOCKET_URL);
     
     newSocket.on('connect', () => {
       setConnected(true);
