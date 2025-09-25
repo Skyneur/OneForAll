@@ -49,16 +49,28 @@ app.use(helmet({
 }));
 
 // Configuration CORS pour les routes HTTP
+console.log('🔧 Environment variables check:');
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  ALLOWED_ORIGINS from env:', process.env.ALLOWED_ORIGINS);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || ["http://localhost:5173"];
+console.log('🔧 Parsed allowed origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('🔍 CORS Request - Origin:', origin);
     // Permettre les requêtes sans origin (ex: Postman, apps mobiles)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('✅ No origin - allowing request');
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('✅ Origin autorisée:', origin);
       callback(null, true);
     } else {
+      console.log('❌ Origin refusée:', origin);
+      console.log('❌ Allowed origins are:', allowedOrigins);
       callback(new Error('Non autorisé par CORS'), false);
     }
   },
