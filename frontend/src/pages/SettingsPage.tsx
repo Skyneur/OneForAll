@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Shield, Eye, Database, Moon, Sun, Volume2, VolumeX, Bell, BellOff, Globe, Trash2, Download, Upload, Clock, UserX, Wifi, WifiOff, Languages, Save, Zap, Battery } from 'lucide-react';
 import './SettingsPage.css';
-import logo from '../assets/images/logo.png';
 
 // Interface pour les paramètres
 interface AppSettings {
