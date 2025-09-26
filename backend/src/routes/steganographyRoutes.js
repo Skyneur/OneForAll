@@ -5,9 +5,38 @@ import fs from 'fs/promises';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
+import os from 'os';
 
 const execAsync = promisify(exec);
 const router = express.Router();
+
+// Fonction pour détecter l'exécutable Python
+async function detectPythonExecutable() {
+  const candidates = [];
+  
+  if (os.platform() === 'win32') {
+    candidates.push('python', 'python3', 'py');
+  } else {
+    candidates.push('python3', 'python');
+  }
+  
+  for (const candidate of candidates) {
+    try {
+      const { stdout } = await execAsync(`${candidate} --version`);
+      if (stdout.includes('Python')) {
+        console.log(`🐍 Python détecté: ${candidate} (${stdout.trim()})`);
+        return candidate;
+      }
+    } catch (error) {
+      // Continuer avec le suivant
+    }
+  }
+  
+  throw new Error('Python non trouvé. Veuillez installer Python.');
+}
+
+// Cache pour l'exécutable Python
+let pythonExecutableCache = null;
 
 // Configuration multer pour l'upload d'images
 const storage = multer.diskStorage({
@@ -92,9 +121,13 @@ router.post('/', upload.single('image'), async (req, res) => {
       );
 
       try {
+        // Obtenir l'exécutable Python
+        if (!pythonExecutableCache) {
+          pythonExecutableCache = process.env.PYTHON_EXECUTABLE || await detectPythonExecutable();
+        }
+        
         // Exécuter le script Python pour cacher le message
-        const pythonExecutable = process.env.PYTHON_EXECUTABLE || 'python';
-        const command = `"${pythonExecutable}" "${pythonScriptPath}" hide -i "${imagePath}" -o "${outputPath}" -m "${message.replace(/"/g, '\\"')}"`;
+        const command = `"${pythonExecutableCache}" "${pythonScriptPath}" hide -i "${imagePath}" -o "${outputPath}" -m "${message.replace(/"/g, '\\"')}"`;
         const { stdout, stderr } = await execAsync(command);
 
         console.log('Stéganographie hide stdout:', stdout);
@@ -135,9 +168,13 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     } else if (mode === 'reveal') {
       try {
+        // Obtenir l'exécutable Python
+        if (!pythonExecutableCache) {
+          pythonExecutableCache = process.env.PYTHON_EXECUTABLE || await detectPythonExecutable();
+        }
+        
         // Exécuter le script Python pour révéler le message
-        const pythonExecutable = process.env.PYTHON_EXECUTABLE || 'python';
-        const command = `"${pythonExecutable}" "${pythonScriptPath}" reveal -i "${imagePath}"`;
+        const command = `"${pythonExecutableCache}" "${pythonScriptPath}" reveal -i "${imagePath}"`;
         const { stdout, stderr } = await execAsync(command);
 
         console.log('Stéganographie reveal stdout:', stdout);
