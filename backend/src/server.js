@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import chatRoutes from './routes/chatRoutes.js';
+import steganographyRoutes from './routes/steganographyRoutes.js';
 import { setupSocketHandlers } from './services/socketService.js';
 
 // Chargement des variables d'environnement
@@ -86,6 +87,7 @@ setupSocketHandlers(io);
 
 // Routes API (avec accès à io)
 app.use('/api/chat', chatRoutes(io));
+app.use('/api/steganography', steganographyRoutes);
 
 // Route de santé
 app.get('/api/health', (req, res) => {

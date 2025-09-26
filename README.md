@@ -60,23 +60,6 @@ OneForAll/
 - Vite (Build tool)
 - Socket.IO Client
 
-## 📡 API Externe
-
-Envoyez des messages depuis vos scripts :
-
-```bash
-# Python
-import requests
-requests.post('http://localhost:3001/api/chat/webhook', json={
-    'message': 'Hello depuis Python!',
-    'username': 'Bot'
-})
-
-# PowerShell
-$json = '{"message":"Hello!", "username":"Bot"}'
-Invoke-WebRequest -Uri "http://localhost:3001/api/chat/webhook" -Method POST -Body $json -ContentType "application/json"
-```
-
 ## 🎯 Utilisation
 
 1. **Démarrez** les deux serveurs

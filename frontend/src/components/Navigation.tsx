@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, MessageCircle, Shield, Settings } from 'lucide-react';
+import { Book, MessageCircle, Shield, Settings, Image } from 'lucide-react';
 import './Navigation.css';
 import logo from '../assets/images/logo.png';
 
@@ -11,6 +11,7 @@ export const Navigation: React.FC = () => {
     { path: '/', icon: Shield, label: 'Accueil' },
     { path: '/documentation', icon: Book, label: 'Documentation' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
+    { path: '/steganography', icon: Image, label: 'Stéganographie' },
     { path: '/settings', icon: Settings, label: 'Paramètres' },
   ];
 
